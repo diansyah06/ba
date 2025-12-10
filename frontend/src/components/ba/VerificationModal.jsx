@@ -3,6 +3,31 @@ import Button from '../common/Button';
 import SignaturePad from '../common/SignaturePad';
 import './VerificationModal.css';
 
+// --- FUNGSI HELPER (Letakkan di luar component) ---
+// Fungsi ini mengubah kode gambar (Base64) menjadi File Asli agar terbaca oleh Backend
+const dataURLtoFile = (dataurl, filename) => {
+    // Cek validitas data
+    if (!dataurl || typeof dataurl !== 'string') return dataurl;
+
+    try {
+        let arr = dataurl.split(','),
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]), 
+            n = bstr.length, 
+            u8arr = new Uint8Array(n);
+            
+        while(n--){
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        
+        return new File([u8arr], filename, {type:mime});
+    } catch (error) {
+        console.error("Gagal mengonversi gambar:", error);
+        return null;
+    }
+}
+// --------------------------------------------------
+
 const VerificationModal = ({ isOpen, onClose, onSubmit, actionType, loading }) => {
     const [notes, setNotes] = useState('');
     const [files, setFiles] = useState([]);
@@ -25,16 +50,20 @@ const VerificationModal = ({ isOpen, onClose, onSubmit, actionType, loading }) =
             alert("Catatan Pemeriksaan wajib diisi!");
             return;
         }
-        // Jika status "Ditolak", apakah perlu tanda tangan?
-        // Biasanya Gudang tetap perlu tanda tangan bukti pemeriksaan meski menolak.
         setStep(2); 
     };
 
+    // --- BAGIAN INI DIPERBAIKI ---
     // Dipanggil saat SignaturePad selesai disimpan
     const handleFinalSubmit = (signatureData) => {
-        // Kirim semua data ke parent
-        onSubmit(actionType, notes, files, signatureData);
+        // Konversi Base64 String (dari Canvas) menjadi File Object
+        // Jika signatureData sudah berupa File (sangat jarang terjadi di logic ini), dia akan tetap aman.
+        const signatureFile = dataURLtoFile(signatureData, 'signature-digital.png');
+
+        // Kirim data yang SUDAH MENJADI FILE ke parent
+        onSubmit(actionType, notes, files, signatureFile);
     };
+    // -----------------------------
 
     const handleClose = () => {
         setStep(1);

@@ -3,25 +3,25 @@ import SignatureCanvas from 'react-signature-canvas';
 import Button from './Button';
 
 const SignaturePad = ({ onSave, onCancel, loading }) => {
-    // FIX 1: Inisialisasi useRef dengan null, bukan object kosong
     const sigCanvas = useRef(null);
-    
     const [activeTab, setActiveTab] = useState('draw'); // 'draw' | 'upload'
-    const [uploadedImage, setUploadedImage] = useState(null);
+    
+    // State untuk menyimpan Base64 string (baik dari gambar canvas maupun upload file)
+    const [signatureData, setSignatureData] = useState(null);
     const [canvasWidth, setCanvasWidth] = useState(450);
 
-    // Optional: Responsive width agar tidak melebar di layar HP
+    // Responsive width
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth < 500) {
-                setCanvasWidth(window.innerWidth - 60); // Padding kiri kanan
+                setCanvasWidth(window.innerWidth - 60); 
             } else {
                 setCanvasWidth(450);
             }
         };
 
         window.addEventListener('resize', handleResize);
-        handleResize(); // Init
+        handleResize(); 
 
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -31,22 +31,22 @@ const SignaturePad = ({ onSave, onCancel, loading }) => {
         if (sigCanvas.current) {
             sigCanvas.current.clear();
         }
-        setUploadedImage(null);
+        setSignatureData(null);
     };
 
     // --- TAB UPLOAD LOGIC ---
     const handleFileUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Validasi ukuran file (misal max 2MB)
             if (file.size > 2 * 1024 * 1024) {
                 alert("Ukuran file terlalu besar! Maksimal 2MB.");
                 return;
             }
 
+            // Baca file sebagai Base64 String agar formatnya sama dengan Canvas
             const reader = new FileReader();
             reader.onload = (evt) => {
-                setUploadedImage(evt.target.result); // Simpan sebagai Base64
+                setSignatureData(evt.target.result); 
             };
             reader.readAsDataURL(file);
         }
@@ -54,37 +54,40 @@ const SignaturePad = ({ onSave, onCancel, loading }) => {
 
     // --- SUBMIT LOGIC ---
     const handleSave = () => {
-        let signatureData = null;
+        let finalData = null;
 
         try {
             if (activeTab === 'draw') {
-                // FIX 2: Cek apakah ref sudah terpasang
+                // --- LOGIKA CANVAS ---
                 if (!sigCanvas.current) {
                     console.error("Canvas reference not found");
                     return;
                 }
 
-                // Cek apakah canvas kosong
                 if (sigCanvas.current.isEmpty()) {
                     alert("Silakan tanda tangan terlebih dahulu pada kotak yang tersedia!");
                     return;
                 }
 
-                // Ambil data gambar (Trimmed menghapus whitespace di sekitar tanda tangan)
-                signatureData = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
+                // FIX: Gunakan .getCanvas() (bukan getTrimmedCanvas yang error)
+                // Hasilnya adalah String Base64, sesuai kebutuhan backend
+                finalData = sigCanvas.current.getCanvas().toDataURL('image/png');
             
             } else {
-                // Logic Tab Upload
-                if (!uploadedImage) {
+                // --- LOGIKA UPLOAD ---
+                if (!signatureData) {
                     alert("Silakan upload gambar tanda tangan!");
                     return;
                 }
-                signatureData = uploadedImage;
+                // Gunakan data Base64 dari hasil upload
+                finalData = signatureData;
             }
 
-            // Kirim data ke parent
+            console.log("Mengirim Tanda Tangan (Base64)...");
+
+            // Kirim string Base64 ke parent
             if (onSave) {
-                onSave(signatureData);
+                onSave(finalData);
             }
 
         } catch (error) {
@@ -100,7 +103,10 @@ const SignaturePad = ({ onSave, onCancel, loading }) => {
             <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                 <button 
                     type="button"
-                    onClick={() => setActiveTab('draw')}
+                    onClick={() => {
+                        setActiveTab('draw');
+                        setSignatureData(null);
+                    }}
                     style={{ 
                         flex: 1, 
                         padding: '8px', 
@@ -116,7 +122,10 @@ const SignaturePad = ({ onSave, onCancel, loading }) => {
                 </button>
                 <button 
                     type="button"
-                    onClick={() => setActiveTab('upload')}
+                    onClick={() => {
+                        setActiveTab('upload');
+                        if (sigCanvas.current) sigCanvas.current.clear();
+                    }}
                     style={{ 
                         flex: 1, 
                         padding: '8px', 
@@ -173,13 +182,13 @@ const SignaturePad = ({ onSave, onCancel, loading }) => {
             {/* TAB CONTENT: UPLOAD */}
             {activeTab === 'upload' && (
                 <div style={{ height: '200px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#fff', border: '2px dashed #ccc', borderRadius: '4px' }}>
-                    {uploadedImage ? (
+                    {signatureData ? (
                         <div style={{ textAlign: 'center', width: '100%' }}>
-                            <img src={uploadedImage} alt="Preview" style={{ maxHeight: '140px', maxWidth: '100%', objectFit: 'contain' }} />
+                            <img src={signatureData} alt="Preview" style={{ maxHeight: '140px', maxWidth: '100%', objectFit: 'contain' }} />
                             <br />
                             <button 
                                 type="button" 
-                                onClick={() => setUploadedImage(null)}
+                                onClick={() => setSignatureData(null)}
                                 style={{ marginTop: '10px', fontSize: '12px', color: '#d32f2f', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 'bold' }}
                             >
                                 🗑️ Hapus Gambar
