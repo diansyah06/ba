@@ -1,0 +1,66 @@
+.ba-table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.ba-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.ba-table th,
+.ba-table td {
+    border-bottom: 1px solid #ddd;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.ba-table th {
+    background-color: #f9f9f9;
+    font-weight: 600;
+    color: #333;
+}
+
+.ba-table tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-disetujui {
+    background-color: #e0f8e9;
+    color: #1d9a50;
+}
+
+.status-ditolak {
+    background-color: #fde2e2;
+    color: #c92a2a;
+}
+
+.status-menunggu {
+    background-color: #fff6d9;
+    color: #b88a00;
+}
+
+.action-button {
+    padding: 6px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.action-button:hover {
+    background-color: #0056b3;
+}

@@ -1,0 +1,115 @@
+/* src/components/ba/VerificationModal.css */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 8px;
+    width: 500px;
+    max-width: 90%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    animation: slideUp 0.3s ease-out;
+}
+
+.modal-title {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 18px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.text-approve {
+    color: #27ae60;
+}
+
+.text-reject {
+    color: #e74c3c;
+}
+
+.modal-form-group {
+    margin-bottom: 15px;
+}
+
+.modal-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+}
+
+.modal-textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-family: inherit;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.modal-textarea:focus {
+    outline: none;
+    border-color: #1abc9c;
+}
+
+.modal-file-input {
+    display: block;
+    width: 100%;
+    font-size: 14px;
+}
+
+.modal-hint {
+    color: #888;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.btn-cancel {
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    color: #666;
+    cursor: pointer;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.btn-cancel:hover {
+    color: #333;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}

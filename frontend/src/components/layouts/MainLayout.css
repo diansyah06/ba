@@ -1,0 +1,23 @@
+.page-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.page-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.page-content {
+    padding: 30px;
+    background-color: #f0f2f5;
+    min-height: calc(100vh - 70px);
+}

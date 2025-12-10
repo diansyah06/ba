@@ -1,0 +1,201 @@
+/* src/pages/Profile/ProfilePage.css */
+
+.profile-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-bottom: 50px;
+}
+
+.profile-header {
+    margin-bottom: 30px;
+}
+
+.profile-header h1 {
+    font-size: 28px;
+    color: #2c3e50;
+    margin: 0 0 5px 0;
+}
+
+.profile-header p {
+    color: #7f8c8d;
+    margin: 0;
+}
+
+/* --- GRID LAYOUT --- */
+.profile-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr; /* Kiri tetap, Kanan fleksibel */
+    gap: 30px;
+    align-items: start;
+}
+
+/* Responsif untuk layar kecil (HP) */
+@media (max-width: 768px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- CARD STYLING --- */
+.profile-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    border: 1px solid #eaeaea;
+}
+
+/* --- INFO CARD (KIRI) --- */
+.profile-info-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.avatar-circle {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #1abc9c, #16a085);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 42px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(26, 188, 156, 0.3);
+}
+
+.info-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0 0 5px 0;
+}
+
+.info-email {
+    color: #7f8c8d;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.role-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Warna Badge Sesuai Role */
+.role-badge.administrator { background: #e3f2fd; color: #0d47a1; }
+.role-badge.vendor { background: #fff3cd; color: #856404; }
+.role-badge.picgudang { background: #d1e7dd; color: #0f5132; }
+.role-badge.direksipekerjaan { background: #e2e3e5; color: #41464b; }
+.role-badge.pemesanbarang { background: #f8d7da; color: #842029; }
+
+.divider {
+    height: 1px;
+    background-color: #eee;
+    width: 100%;
+    margin: 25px 0;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.detail-label { color: #999; font-weight: 500; }
+.detail-value { color: #333; font-weight: 600; }
+
+/* --- SECURITY CARD (KANAN) --- */
+.security-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.security-icon {
+    font-size: 24px;
+    background: #fdf2f2; /* Merah muda lembut */
+    color: #e74c3c;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.security-icon.active {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.security-title h3 { margin: 0; font-size: 18px; color: #333; }
+.security-title p { margin: 4px 0 0 0; font-size: 13px; color: #777; }
+
+/* Form Elements Custom */
+.custom-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-top: 10px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.custom-input:focus {
+    border-color: #1abc9c;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.1);
+}
+
+.qr-section {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px dashed #ccc;
+    margin-top: 20px;
+}
+
+.qr-image {
+    max-width: 180px;
+    border: 5px solid white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin: 15px 0;
+}
+
+.btn-cancel {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-weight: 600;
+    margin-top: 15px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-cancel:hover { text-decoration: underline; }
+
+.status-active-box {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}

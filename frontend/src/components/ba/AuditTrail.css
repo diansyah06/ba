@@ -1,0 +1,146 @@
+.audit-trail-container {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 25px;
+    margin-top: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.audit-title {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 18px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Timeline Base */
+.timeline {
+    position: relative;
+    padding-left: 10px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    /* Posisi garis vertikal */
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 60px;
+    /* Jarak icon ke teks */
+    margin-bottom: 30px;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Icon Bulat */
+.timeline-icon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    z-index: 2;
+    /* Agar di atas garis */
+}
+
+/* Content Box */
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #eee;
+}
+
+.timeline-header {
+    margin-bottom: 5px;
+}
+
+.timeline-date {
+    font-size: 12px;
+    color: #888;
+    background: #fff;
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid #eee;
+}
+
+.timeline-title {
+    margin: 5px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.timeline-actor {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.timeline-pic {
+    color: #777;
+    font-style: italic;
+    font-size: 13px;
+}
+
+.timeline-note {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #666;
+    background: #fff;
+    padding: 8px;
+    border-left: 3px solid #ccc;
+    font-style: italic;
+}
+
+/* --- Status Colors --- */
+/* Completed (Green) */
+.timeline-item.completed .timeline-icon {
+    background-color: #d1fae5;
+    border-color: #10b981;
+    color: #065f46;
+}
+
+.timeline-item.completed .timeline-content {
+    border-left: 4px solid #10b981;
+}
+
+/* Rejected (Red) */
+.timeline-item.rejected .timeline-icon {
+    background-color: #fee2e2;
+    border-color: #ef4444;
+    color: #991b1b;
+}
+
+.timeline-item.rejected .timeline-content {
+    border-left: 4px solid #ef4444;
+}
+
+/* Current/Waiting (Yellow/Blue) */
+.timeline-item.current .timeline-icon {
+    background-color: #eff6ff;
+    border-color: #3b82f6;
+    color: #1e40af;
+}
+
+.timeline-item.current .timeline-content {
+    border-left: 4px solid #3b82f6;
+}

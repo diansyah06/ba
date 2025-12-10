@@ -1,0 +1,111 @@
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.dashboard-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-text-header);
+    margin: 0 0 5px 0;
+}
+
+.dashboard-header p {
+    font-size: 16px;
+    color: var(--color-text-body);
+    margin: 0;
+}
+
+.dashboard-card {
+    background-color: var(--color-bg-card);
+    border-radius: var(--border-radius-main);
+    box-shadow: var(--shadow-main);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-bg-header-footer);
+}
+
+.card-header h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--color-text-header);
+}
+
+.card-body {
+    padding: 0 24px;
+}
+
+.card-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--color-border);
+    background-color: var(--color-bg-header-footer);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: var(--color-text-body);
+}
+
+.pagination-controls button {
+    background-color: #e9ecef;
+    border: 1px solid var(--color-border-pagination);
+    color: var(--color-text-light);
+    padding: 8px 12px;
+    margin-left: 5px;
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition-speed);
+}
+
+.pagination-controls button:hover {
+    background-color: #dee2e6;
+}
+
+.pagination-controls button.disabled,
+.pagination-controls button:disabled {
+    background-color: #f8f9fa;
+    color: #adb5bd;
+    cursor: not-allowed;
+    border-color: #f8f9fa;
+}
+
+.dashboard-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 15px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    color: #666;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.tab-btn.active {
+    background-color: var(--color-primary);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(26, 188, 156, 0.3);
+}

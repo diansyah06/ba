@@ -1,0 +1,78 @@
+/* src/index.css */
+
+/* 1. Variabel Global (Warna & Font) */
+:root {
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  
+  /* Warna Utama */
+  --color-primary: #1ABC9C;       /* Hijau Tosca */
+  --color-primary-hover: #16a085;
+  --color-secondary: #007bff;     /* Biru */
+  --color-danger: #e74c3c;        /* Merah */
+  
+  /* Warna Teks */
+  --color-text-header: #2c3e50;
+  --color-text-body: #555;
+  --color-text-light: #495057;
+  
+  /* Warna Background & Border */
+  --color-bg-card: #ffffff;
+  --color-bg-header-footer: #fcfcfc;
+  --color-bg-page: #f0f2f5;
+  --color-border: #e0e0e0;
+  --color-border-pagination: #dee2e6;
+  
+  /* UI Elements */
+  --shadow-main: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --border-radius-main: 8px;
+  --border-radius-small: 4px;
+  --transition-speed: 0.2s ease;
+}
+
+/* 2. Reset Dasar */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-sans);
+  background-color: var(--color-bg-page);
+  color: var(--color-text-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 3. Komponen Global (Tombol) */
+.btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--border-radius-small);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  box-shadow: 0 4px 14px rgba(26, 188, 156, 0.3);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.btn-secondary {
+    background-color: #ffffff;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.btn-secondary:hover {
+    background-color: #f8f8f8;
+}
