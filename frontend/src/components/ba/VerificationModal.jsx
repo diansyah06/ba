@@ -56,12 +56,11 @@ const VerificationModal = ({ isOpen, onClose, onSubmit, actionType, loading }) =
     // --- BAGIAN INI DIPERBAIKI ---
     // Dipanggil saat SignaturePad selesai disimpan
     const handleFinalSubmit = (signatureData) => {
-        // Konversi Base64 String (dari Canvas) menjadi File Object
-        // Jika signatureData sudah berupa File (sangat jarang terjadi di logic ini), dia akan tetap aman.
-        const signatureFile = dataURLtoFile(signatureData, 'signature-digital.png');
+      
+        //const signatureFile = dataURLtoFile(signatureData, 'signature-digital.png');
 
-        // Kirim data yang SUDAH MENJADI FILE ke parent
-        onSubmit(actionType, notes, files, signatureFile);
+        
+        onSubmit(actionType, notes, files, signatureData);
     };
     // -----------------------------
 

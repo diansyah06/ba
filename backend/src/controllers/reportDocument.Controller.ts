@@ -324,13 +324,13 @@ export default {
     response.success(res, result, "Success resubmit a report document");
   },
   //
+  // [GANTIKAN FUNGSI verifyByWarehouse DENGAN INI]
   async verifyByWarehouse(req: IReqUser, res: Response) {
     try {
       const { id } = req.params;
       const userId = req.user?.id;
       
-      // TERIMA DATA DARI BODY (JSON)
-      // 'images' sekarang dikirim sebagai array object dari frontend
+      // TERIMA DATA DARI BODY JSON
       const { checkStatus, notes, digitalSignature, images } = req.body;
 
       await verifyWarehouseValidationSchema.validate(
@@ -338,38 +338,28 @@ export default {
         { abortEarly: false }
       );
 
-      // --- LOGIKA VALIDASI FILE DARI REQUEST DIHAPUS (Sudah ditangani frontend) ---
-      // (Hapus blok pengecekan req.files, maxImagesAllowed, dll di sini)
-
       const validStatuses = Object.values(STATUS_WAREHOUSE_CHECK);
-
       if (!validStatuses.includes(checkStatus)) {
-        return response.error(
-          res,
-          null,
-          `Invalid checkStatus. Allowed values: ${validStatuses.join(", ")}`
-        );
+        return response.error(res, null, "Invalid checkStatus");
       }
 
       const user = await UserModel.findById(userId);
-      if (!user) return response.notFound(res, "User not found");
-      if (user.role !== ROLES.PICGUDANG) return response.unauthorized(res, "unauthorized");
-      if (!user.warehouseId) return response.unauthorized(res, "unauthorized");
+      if (!user || user.role !== ROLES.PICGUDANG || !user.warehouseId) {
+        return response.unauthorized(res, "Unauthorized");
+      }
 
       const warehouse = await WarehouseModel.findById(user.warehouseId);
       if (!warehouse) return response.notFound(res, "Warehouse not found");
 
       const doc = await ReportDocumentModel.findById(id);
       if (!doc) return response.notFound(res, "Report Document not found");
-      if (doc.category !== CATEGORY_REPORT_DOCUMENT.BAPB) return response.error(res, null, "Report Document not BAPB");
-      if (doc.status !== STATUS_REPORT_DOCUMENT.PENDING) return response.error(res, null, "Report Document already approved");
-
+      if (doc.category !== CATEGORY_REPORT_DOCUMENT.BAPB) return response.error(res, null, "Not BAPB");
+      if (doc.status !== STATUS_REPORT_DOCUMENT.PENDING) return response.error(res, null, "Already processed");
       if (doc.targetWarehouse && doc.targetWarehouse.toString() !== warehouse._id.toString()) {
-        return response.unauthorized(res, "unauthorized");
+        return response.unauthorized(res, "Wrong Warehouse");
       }
 
-      // Gunakan images dari body. Jika user tidak upload, default ke array kosong.
-      // Pastikan formatnya sesuai (optional sanitation)
+      // Ambil array images dari JSON Body (hasil upload frontend)
       let finalImages: ImageMetaData[] = [];
       if (Array.isArray(images)) {
           finalImages = images;
@@ -383,72 +373,44 @@ export default {
         checkAt: new Date(),
         checkStatus: checkStatus,
         notes: notes,
-        images: finalImages, // Simpan URL gambar yang diterima
-        digitalSignature: digitalSignature || "", // JSON String aman, tidak akan jadi object {}
+        images: finalImages, 
+        digitalSignature: digitalSignature || "", // AMAN: String JSON tidak akan jadi object {}
       };
 
-      let updatePayload: any = {
-        warehouseCheck: warehouseCheckPayload,
-      };
-
+      // Update Database
+      let updatePayload: any = { warehouseCheck: warehouseCheckPayload };
       if (checkStatus === STATUS_WAREHOUSE_CHECK.REJECTED) {
         updatePayload.status = STATUS_REPORT_DOCUMENT.REJECTED;
       }
       
-      const result = await ReportDocumentModel.findByIdAndUpdate(
-        id,
-        updatePayload,
-        {
-          new: true,
-        }
-      );
+      const result = await ReportDocumentModel.findByIdAndUpdate(id, updatePayload, { new: true });
 
-      // --- LOGIKA NOTIFIKASI (TETAP SAMA / TIDAK BERUBAH) ---
+      // Notifikasi (Logika Lama - Tidak Berubah)
       try {
         if (checkStatus === STATUS_WAREHOUSE_CHECK.APPROVED) {
-          const approvers = await UserModel.find({
-            role: ROLES.PEMESANBARANG,
-          });
-
-          const company = await CompanyModel.findById(
-            doc.vendorSnapshot.companyRefId
-          );
+          const approvers = await UserModel.find({ role: ROLES.PEMESANBARANG });
+          const company = await CompanyModel.findById(doc.vendorSnapshot.companyRefId);
+          const docForNotif = { ...result?.toObject(), warehouseCheck: warehouseCheckPayload };
           
-          // Pastikan objek notifikasi lengkap
-          const docForNotif = {
-              ...result?.toObject(),
-              warehouseCheck: warehouseCheckPayload
-          };
-
           for (const approver of approvers) {
             await NotificationService.notifyApprovalNeeded(
-              docForNotif,
-              approver,
-              company?.companyName || doc.vendorSnapshot.companyName,
-              user.fullname
+              docForNotif, approver, 
+              company?.companyName || doc.vendorSnapshot.companyName, user.fullname
             );
           }
         } else if (checkStatus === STATUS_WAREHOUSE_CHECK.REJECTED) {
           const vendorUser = await UserModel.findById(doc.createdBy);
           if (vendorUser) {
-            await NotificationService.notifyDocumentRejected(
-              result,
-              vendorUser,
-              user.fullname,
-              "warehouse"
-            );
+            await NotificationService.notifyDocumentRejected(result, vendorUser, user.fullname, "warehouse");
           }
         }
-      } catch (notifError) {
-        console.error("Notification error:", notifError);
-      }
+      } catch (notifError) { console.error("Notification error:", notifError); }
 
       response.success(res, result, "Success verify by warehouse");
     } catch (error) {
       response.error(res, error, "failed verify by warehouse");
     }
   },
-
   async approve(req: IReqUser, res: Response) {
     try {
       const { id } = req.params;
