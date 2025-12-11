@@ -152,18 +152,9 @@ router.patch(
   reportDocumentController.resubmit
 );
 
-// router.patch(
-//   "/report-documents/:id/verify",
-//   [authMiddleware, aclMiddleware([ROLES.PICGUDANG])],
-//   mediaMiddleware.multiple("images"),
-//   reportDocumentController.verifyByWarehouse
-// );
-
 router.patch(
   "/report-documents/:id/verify",
-  authMiddleware,
-  // TAMBAHKAN INI AGAR BISA BACA FORMDATA:
-  mediaMiddleware.multiple("images"), 
+  authMiddleware, 
   reportDocumentController.verifyByWarehouse
 );
 

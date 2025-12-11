@@ -59,26 +59,51 @@ const baService = {
     },
 
     // VERIFY (BAPB / Gudang) - FormData Payload (PERBAIKAN HEADER)
+    // VERIFY (BAPB / Gudang) - REVISI: Upload Dulu, Baru Submit JSON
+    //
+    // VERIFY (BAPB / Gudang) - REVISI: Upload Gambar Terpisah, Kirim Data sebagai JSON
     verify: async (id, status, notes, files, signature) => {
         try {
-            const formData = new FormData();
+            let uploadedImages = [];
 
-            const statusEnum = status === 'Disetujui' ? 'approved' : 'rejected';
-            formData.append('checkStatus', statusEnum);
-            formData.append('notes', notes);
-
-            // Tambahkan Tanda Tangan ke FormData jika ada (Base64 String)
-            if (signature) {
-                formData.append('digitalSignature', signature);
-            }
-
+            // 1. JIKA ADA FILE BUKTI FISIK, UPLOAD TERPISAH DULU
             if (files && files.length > 0) {
+                const formData = new FormData();
+                // Penting: Gunakan key 'files' sesuai endpoint upload-multiple di backend
                 Array.from(files).forEach((file) => {
-                    formData.append('images', file);
+                    formData.append('files', file);
                 });
+
+                // Upload ke endpoint media khusus
+                const uploadResponse = await api.post('/media/upload-multiple', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+
+                // Ambil hasil upload dan format sesuai schema database
+                // Asumsi response media controller: { data: [{ secure_url, public_id }, ...] }
+                if (uploadResponse.data && Array.isArray(uploadResponse.data.data)) {
+                    uploadedImages = uploadResponse.data.data.map(img => ({
+                        url: img.secure_url,
+                        publicId: img.public_id,
+                        uploadedAt: new Date()
+                    }));
+                }
             }
-            const response = await api.patch(`/report-documents/${id}/verify`, formData);
-            
+
+            // 2. KIRIM DATA VERIFIKASI SEBAGAI JSON (SEPERTI BAPP)
+            // Karena JSON, string signature yang panjang tidak akan error/terpotong
+            const payload = {
+                checkStatus: status === 'Disetujui' ? 'approved' : 'rejected',
+                notes: notes,
+                digitalSignature: signature, // String Base64 aman di sini
+                images: uploadedImages       // Array metadata gambar (hasil upload langkah 1)
+            };
+
+            // Kirim ke endpoint verify (tanpa FormData, otomatis JSON)
+            const response = await api.patch(`/report-documents/${id}/verify`, payload);
+
             return response.data;
         } catch (error) {
             console.error("Error verifying:", error);

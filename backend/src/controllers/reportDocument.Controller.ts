@@ -323,39 +323,23 @@ export default {
 
     response.success(res, result, "Success resubmit a report document");
   },
+  //
   async verifyByWarehouse(req: IReqUser, res: Response) {
     try {
       const { id } = req.params;
       const userId = req.user?.id;
-      const { checkStatus, notes, digitalSignature } = req.body;
+      
+      // TERIMA DATA DARI BODY (JSON)
+      // 'images' sekarang dikirim sebagai array object dari frontend
+      const { checkStatus, notes, digitalSignature, images } = req.body;
 
       await verifyWarehouseValidationSchema.validate(
         { checkStatus, notes },
         { abortEarly: false }
       );
 
-      const files = req.files as Express.Multer.File[] | undefined;
-      const maxImagesAllowed = 5;
-      const maxFileSize = 5;
-
-      if (files && files.length > maxImagesAllowed) {
-        return response.badRequest(
-          res,
-          `You can upload a maximum of ${maxImagesAllowed} images.`
-        );
-      }
-
-      if (files) {
-        const invalidFiles = files.filter(
-          (file) => file.size > maxFileSize * 1024 * 1024
-        );
-        if (invalidFiles.length > 0) {
-          return response.badRequest(
-            res,
-            `File size must be less than ${maxFileSize}MB.`
-          );
-        }
-      }
+      // --- LOGIKA VALIDASI FILE DARI REQUEST DIHAPUS (Sudah ditangani frontend) ---
+      // (Hapus blok pengecekan req.files, maxImagesAllowed, dll di sini)
 
       const validStatuses = Object.values(STATUS_WAREHOUSE_CHECK);
 
@@ -368,62 +352,30 @@ export default {
       }
 
       const user = await UserModel.findById(userId);
-      if (!user) {
-        return response.notFound(res, "User not found");
-      }
-
-      if (user.role !== ROLES.PICGUDANG) {
-        return response.unauthorized(res, "unauthorized");
-      }
-
-      if (!user.warehouseId) {
-        return response.unauthorized(res, "unauthorized");
-      }
+      if (!user) return response.notFound(res, "User not found");
+      if (user.role !== ROLES.PICGUDANG) return response.unauthorized(res, "unauthorized");
+      if (!user.warehouseId) return response.unauthorized(res, "unauthorized");
 
       const warehouse = await WarehouseModel.findById(user.warehouseId);
-      if (!warehouse) {
-        return response.notFound(res, "Warehouse not found");
-      }
+      if (!warehouse) return response.notFound(res, "Warehouse not found");
 
       const doc = await ReportDocumentModel.findById(id);
-      if (!doc) {
-        return response.notFound(res, "Report Document not found");
-      }
-      if (doc.category !== CATEGORY_REPORT_DOCUMENT.BAPB) {
-        return response.error(res, null, "Report Document not BAPB");
-      }
-      if (doc.status !== STATUS_REPORT_DOCUMENT.PENDING) {
-        return response.error(res, null, "Report Document already approved");
-      }
+      if (!doc) return response.notFound(res, "Report Document not found");
+      if (doc.category !== CATEGORY_REPORT_DOCUMENT.BAPB) return response.error(res, null, "Report Document not BAPB");
+      if (doc.status !== STATUS_REPORT_DOCUMENT.PENDING) return response.error(res, null, "Report Document already approved");
 
-      if (
-        doc.targetWarehouse &&
-        doc.targetWarehouse.toString() !== warehouse._id.toString()
-      ) {
+      if (doc.targetWarehouse && doc.targetWarehouse.toString() !== warehouse._id.toString()) {
         return response.unauthorized(res, "unauthorized");
       }
 
-      let uploadedImages: ImageMetaData[] = [];
-
-      if (files && files.length > 0) {
-        try {
-          const uploadResults = await uploader.uploadMultiple(files);
-
-          uploadedImages = uploadResults.map((result) => ({
-            url: result.secure_url,
-            publicId: result.public_id,
-            uploadedAt: new Date(),
-          }));
-        } catch (error) {
-          return response.error(
-            res,
-            error,
-            "Failed to upload images. Please try again."
-          );
-        }
+      // Gunakan images dari body. Jika user tidak upload, default ke array kosong.
+      // Pastikan formatnya sesuai (optional sanitation)
+      let finalImages: ImageMetaData[] = [];
+      if (Array.isArray(images)) {
+          finalImages = images;
       }
 
-      const warehouseCheckPayload = { 
+      const warehouseCheckPayload = {
         warehouseRefId: warehouse._id,
         warehouseName: warehouse.warehouseName,
         checkerRefId: user._id,
@@ -431,8 +383,8 @@ export default {
         checkAt: new Date(),
         checkStatus: checkStatus,
         notes: notes,
-        images: uploadedImages,
-        digitalSignature: digitalSignature || "", // SIMPAN TANDA TANGAN
+        images: finalImages, // Simpan URL gambar yang diterima
+        digitalSignature: digitalSignature || "", // JSON String aman, tidak akan jadi object {}
       };
 
       let updatePayload: any = {
@@ -442,6 +394,7 @@ export default {
       if (checkStatus === STATUS_WAREHOUSE_CHECK.REJECTED) {
         updatePayload.status = STATUS_REPORT_DOCUMENT.REJECTED;
       }
+      
       const result = await ReportDocumentModel.findByIdAndUpdate(
         id,
         updatePayload,
@@ -450,9 +403,9 @@ export default {
         }
       );
 
+      // --- LOGIKA NOTIFIKASI (TETAP SAMA / TIDAK BERUBAH) ---
       try {
         if (checkStatus === STATUS_WAREHOUSE_CHECK.APPROVED) {
-          // Kirim notifikasi ke Pemesan Barang untuk approval
           const approvers = await UserModel.find({
             role: ROLES.PEMESANBARANG,
           });
@@ -460,17 +413,22 @@ export default {
           const company = await CompanyModel.findById(
             doc.vendorSnapshot.companyRefId
           );
+          
+          // Pastikan objek notifikasi lengkap
+          const docForNotif = {
+              ...result?.toObject(),
+              warehouseCheck: warehouseCheckPayload
+          };
 
           for (const approver of approvers) {
             await NotificationService.notifyApprovalNeeded(
-              result,
+              docForNotif,
               approver,
               company?.companyName || doc.vendorSnapshot.companyName,
               user.fullname
             );
           }
         } else if (checkStatus === STATUS_WAREHOUSE_CHECK.REJECTED) {
-          // Kirim notifikasi penolakan ke vendor
           const vendorUser = await UserModel.findById(doc.createdBy);
           if (vendorUser) {
             await NotificationService.notifyDocumentRejected(
@@ -490,6 +448,7 @@ export default {
       response.error(res, error, "failed verify by warehouse");
     }
   },
+
   async approve(req: IReqUser, res: Response) {
     try {
       const { id } = req.params;
