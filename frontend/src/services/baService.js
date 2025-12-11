@@ -31,7 +31,7 @@ const baService = {
         }
     },
 
-    // --- FITUR REVISI (BARU) ---
+    // --- FITUR REVISI ---
     resubmit: async (id, payload) => {
         try {
             const response = await api.patch(`/report-documents/${id}/resubmit`, payload);
@@ -42,13 +42,13 @@ const baService = {
         }
     },
 
-    // UPDATE: Terima parameter signature untuk Direksi/Pemesan
+    // APPROVE (BAPP / Final Approval) - JSON Payload (Sudah Benar)
     approve: async (id, status, notes, signature) => {
         try {
             const payload = {
                 status: status === 'Disetujui' ? 'approved' : 'rejected',
                 notes: notes || (status === 'Disetujui' ? 'Dokumen disetujui.' : 'Ditolak, mohon revisi.'),
-                digitalSignature: signature // Kirim string Base64 (Gambar Tanda Tangan)
+                digitalSignature: signature // Mengirim string Base64
             };
             const response = await api.patch(`/report-documents/${id}/approve`, payload);
             return response.data;
@@ -58,7 +58,7 @@ const baService = {
         }
     },
 
-    // UPDATE: Terima parameter signature untuk Gudang
+    // VERIFY (BAPB / Gudang) - FormData Payload (PERBAIKAN HEADER)
     verify: async (id, status, notes, files, signature) => {
         try {
             const formData = new FormData();
@@ -67,7 +67,7 @@ const baService = {
             formData.append('checkStatus', statusEnum);
             formData.append('notes', notes);
 
-            // Tambahkan Tanda Tangan ke FormData jika ada
+            // Tambahkan Tanda Tangan ke FormData jika ada (Base64 String)
             if (signature) {
                 formData.append('digitalSignature', signature);
             }
@@ -77,10 +77,8 @@ const baService = {
                     formData.append('images', file);
                 });
             }
-
-            const response = await api.patch(`/report-documents/${id}/verify`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const response = await api.patch(`/report-documents/${id}/verify`, formData);
+            
             return response.data;
         } catch (error) {
             console.error("Error verifying:", error);
